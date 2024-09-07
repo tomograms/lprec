@@ -18,16 +18,16 @@ __host__ __device__ void bspline_weights(float2 fraction, float2& w0, float2& w1
 	w3 = 1.0f/6.0f * squared * fraction;
 }
 
-__device__ float linearTex2D(cudaTextureObject_t tex, float x, float y, float z, int N0,int N1)
+__device__ float linearTex2D(cudaTextureObject_t tex, float x, float y, int z, int N0,int N1)
 {
 	float2 t0;
 	t0.x = x/(float)N0;
 	t0.y = y/(float)N1;
-	return tex2DLayered<float>(tex, t0.x, t0.y, (int)z);
+	return tex2DLayered<float>(tex, t0.x, t0.y, z);
 }
 
 //cubic interpolation via two linear interpolations for several slices, texture is not normalized
-__device__ float cubicTex2D(cudaTextureObject_t tex, float x, float y, float z, int N0,int N1)
+__device__ float cubicTex2D(cudaTextureObject_t tex, float x, float y, int z, int N0,int N1)
 {
 	// transform the coordinate from [0,extent] to [-0.5, extent-0.5]
 	const float2 coord_grid = make_float2(x - 0.5f, y - 0.5f);
@@ -46,10 +46,10 @@ __device__ float cubicTex2D(cudaTextureObject_t tex, float x, float y, float z, 
 	t1.x = h1.x/(float)N0;
 	t0.y = h0.y/(float)N1;
 	t1.y = h1.y/(float)N1;
-	float tex00 = tex2DLayered<float>(tex, t0.x, t0.y, (int)z);
-	float tex10 = tex2DLayered<float>(tex, t1.x, t0.y, (int)z);
-	float tex01 = tex2DLayered<float>(tex, t0.x, t1.y, (int)z);
-	float tex11 = tex2DLayered<float>(tex, t1.x, t1.y, (int)z);
+	float tex00 = tex2DLayered<float>(tex, t0.x, t0.y, z);
+	float tex10 = tex2DLayered<float>(tex, t1.x, t0.y, z);
+	float tex01 = tex2DLayered<float>(tex, t0.x, t1.y, z);
+	float tex11 = tex2DLayered<float>(tex, t1.x, t1.y, z);
 
 
 	// weigh along the y-direction
@@ -69,8 +69,8 @@ __global__ void interp(int interp_id, cudaTextureObject_t texfObj, cudaTextureOb
 	uint tz = blockIdx.z*blockDim.z + threadIdx.z;
 	uint tid = ty*W+tx;
 	if(tid>=Np||tz>=ni) return;
-	float u = (x[tid]+0.5f)/N1;
-	float v = (y[tid]+0.5f)/N2;
+	float u = x[tid]+0.5f;
+	float v = y[tid]+0.5f;
 	
 	switch(interp_id)//no overhead, all threads have the same way
 	{ 		
