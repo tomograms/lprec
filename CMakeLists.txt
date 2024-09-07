@@ -2,6 +2,10 @@
 # 3.11.0 is from scikit-build documentation
 cmake_minimum_required(VERSION 3.11.0)
 
+if(NOT DEFINED CMAKE_CUDA_ARCHITECTURES)
+  set(CMAKE_CUDA_ARCHITECTURES 70)
+endif()
+
 project(lprec LANGUAGES CXX)
 
 # ---- DEFINE BUILD OPTIONS HERE ---- #
