@@ -1,3 +1,4 @@
+#include <cuda_runtime.h>
 #include <cufft.h>
 #include <stdio.h>
 #include "config.cuh"
@@ -26,6 +27,7 @@ class lpRgpu
 	float* dfl;
 	float2* dflc;
 	cudaArray* dfla;
+	cudaTextureObject_t texflObj;	
 	cufftHandle plan_forward;
 	cufftHandle plan_inverse;
 	cufftHandle plan_f_forward;
@@ -34,14 +36,16 @@ class lpRgpu
 	float2* fZfwd;
 	float2* dfZfwd;
 	cudaArray* dfa;
+	cudaTextureObject_t texfObj;
 	float* dR;
 	float* dtmpf;
-
+	
 	//adj
 	float2* fZadj;
 	float2* dfZadj;
 	float* dtmpR;
 	cudaArray* dRa;
+	cudaTextureObject_t texRObj;
 	float* df;
 
 	//filter
